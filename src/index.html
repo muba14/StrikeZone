@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>StrikeZone</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="vignette"></div>
+  <div id="scope"><div class="lens"></div><div class="h"></div><div class="v"></div></div>
+  <div id="crosshair"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="dot"></i><i class="ring"></i></div>
+  <div id="dmgNums"></div>
+  <div id="killcam" class="hidden"><div class="kc-title">KILLCAM</div><div class="kc-info"><span class="kc-name"></span> seni öldürdü</div><div class="kc-weap"></div><div class="kc-hp"></div><div class="kc-bar"><i></i></div><div class="kc-skip">Sol tık: geç</div></div>
+  <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+  <div id="dmgdir"></div>
+  <canvas id="radar" width="200" height="200"></canvas>
+  <div id="topbar">
+    <div class="team t"><div class="alive" id="aliveT"></div><div class="score" id="scoreT">0</div></div>
+    <div class="clock"><div id="timer">1:55</div><div id="roundNo">ROUND 1</div></div>
+    <div class="team ct"><div class="score" id="scoreCT">0</div><div class="alive" id="aliveCT"></div></div>
+  </div>
+  <div id="killfeed"></div>
+  <div id="bottomleft">
+    <div class="stat"><span class="ico">✚</span><span id="hp">100</span></div>
+    <div class="stat"><span class="ico">⛨</span><span id="armor">100</span></div>
+    <div class="stat money"><span class="ico">$</span><span id="money">800</span></div>
+  </div>
+  <div id="moneyPops"></div>
+  <div id="bombInfo"></div>
+  <div id="progress"><div class="label" id="progLabel"></div><div class="bar"><i></i></div></div>
+  <div id="flash"></div>
+  <div id="bottomright">
+    <div id="weaponName">AK-47</div>
+    <div><span id="ammo">30</span><span class="sep">/</span><span id="reserve">90</span></div>
+    <div id="slots"></div>
+  </div>
+  <div id="center-msg"></div>
+  <div id="banner"><div class="title"></div><div class="sub"></div></div>
+  <div id="hint"></div>
+  <div id="buy" class="hidden">
+    <h3>SATIN AL <small>(rakam tuşlarıyla seç · B ile kapat)</small></h3>
+    <div id="buyBody"></div>
+  </div>
+  <div id="scoreboard" class="hidden"></div>
+</div>
+
+<!-- MENU -->
+<div id="menu">
+  <div class="bg"></div>
+  <div class="gold-badge"><span class="coin">◆</span> <b id="goldVal">0</b> altın</div>
+  <div class="menu-inner">
+    <div class="logo">STRIKE<span>ZONE</span></div>
+    <div class="tag">Taktiksel 5v5 FPS · Botlara karşı</div>
+    <div class="section">
+      <h3>HARİTA</h3>
+      <div id="maps"></div>
+    </div>
+    <div class="section row">
+      <div>
+        <h3>TAKIM</h3>
+        <div class="seg" id="teamSel">
+          <button data-v="T" class="on">SALDIRI (T)</button>
+          <button data-v="CT">SAVUNMA (CT)</button>
+        </div>
+      </div>
+      <div>
+        <h3>ZORLUK</h3>
+        <div class="seg" id="diffSel">
+          <button data-v="0">KOLAY</button>
+          <button data-v="1" class="on">NORMAL</button>
+          <button data-v="2">ZOR</button>
+        </div>
+      </div>
+      <div>
+        <h3>TAKIM BOYUTU</h3>
+        <div class="seg" id="sizeSel">
+          <button data-v="1">1v1</button>
+          <button data-v="3">3v3</button>
+          <button data-v="5" class="on">5v5</button>
+        </div>
+      </div>
+    </div>
+    <div class="section row settings">
+      <label>Hassasiyet <input type="range" id="sens" min="0.2" max="4" step="0.05" value="1.2"><b id="sensV">1.20</b></label>
+      <label>Görüş Açısı <input type="range" id="fov" min="65" max="105" step="1" value="80"><b id="fovV">80</b></label>
+      <label>Ses <input type="range" id="vol" min="0" max="1" step="0.05" value="0.6"><b id="volV">60</b></label>
+      <label>Grafik <select id="quality"><option value="2">Yüksek</option><option value="1">Orta</option><option value="0">Düşük</option></select></label>
+    </div>
+    <div class="play-row">
+      <button id="play" class="play">OYNA</button>
+      <button id="btnInv" class="ghost">ENVANTER</button>
+      <button id="btnCases" class="ghost">KASALAR</button>
+      <button id="btnStats" class="ghost">İSTATİSTİK</button>
+      <button id="btnCh" class="ghost">NİŞANGÂH</button>
+    </div>
+    <div class="keys">WASD hareket · Mouse nişan/ateş · Sağ tık dürbün · R şarjör · 1/2/3 silah · 4 bomba · B satın al · E bomba kur/imha et · G bombayı bırak · Shift yürü · Ctrl eğil · Space zıpla · Tab skor · Esc menü</div>
+  </div>
+</div>
+
+<div id="pause" class="hidden">
+  <div class="box">
+    <h2>DURAKLATILDI</h2>
+    <button id="resume" class="play">DEVAM ET</button>
+    <button id="quit" class="ghost">ANA MENÜ</button>
+  </div>
+</div>
+
+<div id="invPanel" class="panel hidden">
+  <div class="panel-box wide">
+    <div class="panel-head"><h2>ENVANTER</h2><div class="gold-inline"><span class="coin">◆</span> <b class="goldVal2">0</b></div><button class="ghost close">KAPAT</button></div>
+    <div class="tabs" id="invTabs"></div>
+    <div id="invGrid" class="grid"></div>
+    <div class="note">Bir skine tıkla: kuşan / çıkar. Kuşanılan skin oyunda silahında görünür.</div>
+  </div>
+</div>
+
+<div id="casePanel" class="panel hidden">
+  <div class="panel-box wide">
+    <div class="panel-head"><h2>KASALAR</h2><div class="gold-inline"><span class="coin">◆</span> <b class="goldVal2">0</b></div><button class="ghost close">KAPAT</button></div>
+    <div id="caseList"></div>
+    <div class="note">Maç oynayarak altın kazanırsın: kill başına 10, kazanılan round başına 20, maç galibiyeti 100.</div>
+  </div>
+</div>
+
+<div id="statsPanel" class="panel hidden">
+  <div class="panel-box wide">
+    <div class="panel-head"><h2>İSTATİSTİKLER</h2><button class="ghost" id="statsReset">SIFIRLA</button><button class="ghost close">KAPAT</button></div>
+    <div id="statsBody"></div>
+  </div>
+</div>
+
+<div id="chPanel" class="panel hidden">
+  <div class="panel-box wide">
+    <div class="panel-head"><h2>NİŞANGÂH</h2><button class="ghost" id="chReset">VARSAYILAN</button><button class="ghost close">KAPAT</button></div>
+    <div class="ch-layout">
+      <div class="ch-preview"><div id="chPreview" class="crosshair-prev"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="ch-controls">
+        <h4>ŞEKİL</h4>
+        <div class="seg" id="chStyle">
+          <button data-v="classic">KLASİK</button><button data-v="classicdot">KLASİK + NOKTA</button><button data-v="dot">NOKTA</button><button data-v="circle">DAİRE</button><button data-v="tshape">T</button>
+        </div>
+        <h4>RENK</h4>
+        <div class="swatches" id="chColors"></div>
+        <label>Uzunluk <input type="range" id="chSize" min="2" max="20" step="1"><b id="chSizeV"></b></label>
+        <label>Kalınlık <input type="range" id="chThick" min="1" max="6" step="1"><b id="chThickV"></b></label>
+        <label>Boşluk <input type="range" id="chGap" min="0" max="16" step="1"><b id="chGapV"></b></label>
+        <label><input type="checkbox" id="chOutline"> Siyah kenarlık</label>
+        <label><input type="checkbox" id="chDynamic"> Dinamik (hareket ve atışta açılır)</label>
+        <h4>DİĞER</h4>
+        <label><input type="checkbox" id="optDmg"> Hasar sayılarını göster</label>
+        <label><input type="checkbox" id="optKillcam"> Killcam</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="openPanel" class="panel hidden">
+  <div class="panel-box wide">
+    <h2 id="openTitle">KASA AÇILIYOR</h2>
+    <div class="reel-wrap"><div id="reel"></div><div class="reel-marker"></div></div>
+    <div id="openResult"></div>
+  </div>
+</div>
+
+<div id="end" class="hidden">
+  <div class="box">
+    <h2 id="endTitle">ZAFER</h2>
+    <div id="endScore"></div>
+    <div id="endGold"></div>
+    <div id="endBoard"></div>
+    <button id="again" class="play">TEKRAR OYNA</button>
+    <button id="endMenu" class="ghost">ANA MENÜ</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

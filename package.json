@@ -1,0 +1,65 @@
+{
+  "name": "strikezone",
+  "version": "1.0.0",
+  "description": "STANDOFF tarzı taktiksel FPS oyunu (Windows)",
+  "main": "electron/main.js",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win --publish never"
+  },
+  "author": "muba14",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.24.0",
+    "three": "^0.170.0"
+  },
+  "private": true,
+  "build": {
+    "appId": "com.muba14.strikezone",
+    "productName": "StrikeZone",
+    "copyright": "Copyright © 2026 muba14",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "StrikeZone",
+      "artifactName": "StrikeZone-Setup-${version}.exe"
+    },
+    "portable": {
+      "artifactName": "StrikeZone-Portable-${version}.exe"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/muba14/StrikeZone.git"
+  }
+}
